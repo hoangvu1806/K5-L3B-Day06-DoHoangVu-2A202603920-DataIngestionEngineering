@@ -119,12 +119,21 @@ main { overflow-y: auto; padding: 16px 0 24px; scrollbar-width: thin; scrollbar-
 .prompt pre { margin: 6px 0 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); }
 .prompt .role { color: var(--accent); font-weight: 500; }
 
-.src-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.src { background: var(--bg); border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: 8px; padding: 6px 10px; }
-.src-head { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--faint); margin-bottom: 3px; }
+.src-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+/* Each chunk is collapsed to one line; click to expand the full text */
+.src { background: var(--bg); border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: 8px; }
+.src > summary { list-style: none; cursor: pointer; padding: 5px 10px; display: grid; grid-template-columns: auto 1fr; gap: 0 8px; align-items: baseline; border-radius: 8px; }
+.src > summary::-webkit-details-marker { display: none; }
+.src > summary:hover { background: var(--tint); }
+.src > summary .chev { font-size: 10px; color: var(--faint); transition: transform .15s; }
+.src[open] > summary .chev { transform: rotate(90deg); }
+.src[open] > summary { border-bottom: 1px dashed var(--line); border-radius: 8px 8px 0 0; }
+.src-head { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--faint); min-width: 0; }
 .src-head .cite { color: var(--accent); font-weight: 600; }
 .src-head .sep { color: var(--tint-2); }
-.src-text { font-size: 12px; line-height: 1.5; color: var(--muted); max-height: 76px; overflow: auto; white-space: pre-wrap; }
+.src-preview { grid-column: 2; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.src[open] .src-preview { display: none; }
+.src-text { font-size: 12.5px; line-height: 1.6; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px 12px 10px 28px; }
 
 .thinking { font-size: 13px; color: var(--muted); }
 .thinking::after { content: ''; animation: dots 1.4s steps(4) infinite; }
@@ -281,10 +290,17 @@ function renderSources(sources) {
   const bodyEl = el('div', 'panel-body');
   const list = el('ul', 'src-list');
   sources.forEach(s => {
-    const item = el('li', 'src');
-    item.appendChild(sourceHead(s));
+    // Collapsed: header + one-line preview. Click to read the full chunk.
+    const li = el('li');
+    const item = el('details', 'src');
+    const head = el('summary');
+    head.appendChild(el('span', 'chev', '›'));
+    head.appendChild(sourceHead(s));
+    head.appendChild(el('span', 'src-preview', (s.text || '').replace(/\s+/g, ' ').trim()));
+    item.appendChild(head);
     item.appendChild(el('div', 'src-text', s.text));
-    list.appendChild(item);
+    li.appendChild(item);
+    list.appendChild(li);
   });
   bodyEl.appendChild(list);
   d.appendChild(bodyEl);
@@ -392,6 +408,7 @@ async function ask() {
   let text = '';
   let pending = false;
   let finished = false;
+  let sourcesPanel = null;
   const paint = (streaming) => { renderMarkdown(body, text, streaming); };
   // A frame scheduled before 'done' must not repaint the caret afterwards.
   const schedule = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; if (!finished) paint(true); }); };
@@ -417,12 +434,15 @@ async function ask() {
         stateEl.textContent = 'đang trả lời';
         thinking.textContent = 'đang viết câu trả lời';
         panels.appendChild(renderRetrieval(data.retrieval, data.prompt, data.retrieval_s));
-        panels.appendChild(renderSources(data.sources));
+        sourcesPanel = renderSources(data.sources);
+        panels.appendChild(sourcesPanel);
       } else if (event === 'delta') {
         text += data.text;
         schedule();
       } else if (event === 'done') {
         finish();
+        // Greetings / refusals cite nothing: hide the sources chip to avoid noise.
+        if (sourcesPanel && !/\[#\d+\]/.test(text)) sourcesPanel.remove();
         stateEl.className = 'dot st-ok';
         stateEl.textContent = 'xong';
         if (data.first_token_s !== null) meta.appendChild(el('span', null, 'token đầu ' + data.first_token_s + 's'));
