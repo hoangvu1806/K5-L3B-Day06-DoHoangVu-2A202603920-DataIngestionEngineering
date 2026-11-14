@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
+from .benchmark import load_benchmark
 from .rag import RagEngine, load_diseases
 
 ROOT = Path(__file__).resolve().parent
@@ -76,6 +77,15 @@ def index(request: Request):
         diseases = []
     return templates.TemplateResponse(request, "index.html",
                                       {"samples": SAMPLES, "diseases": diseases})
+
+
+@app.get("/api/benchmark")
+def benchmark():
+    """Frozen Day 06 benchmark: per-strategy scores and top-3 traces of all 24 questions."""
+    try:
+        return load_benchmark()
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"Thiếu file kết quả benchmark: {exc.filename}")
 
 
 @app.get("/api/health")
