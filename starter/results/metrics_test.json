@@ -1,0 +1,122 @@
+{
+  "run_at": "2026-11-14T03:47:00+00:00",
+  "split": "test",
+  "n_questions": 6,
+  "top_k": 3,
+  "model": "google/gemini-embedding-2",
+  "dimensions": 3072,
+  "query_embedding_cost_usd": 2.5e-05,
+  "query_embedding_seconds": 9.7,
+  "summary": {
+    "A": {
+      "hit1": {
+        "n": 1,
+        "N": 6,
+        "rate": 0.167,
+        "text": "1/6"
+      },
+      "evidence_hit3": {
+        "n": 3,
+        "N": 6,
+        "rate": 0.5,
+        "text": "3/6"
+      },
+      "page_hit3": {
+        "n": 3,
+        "N": 6,
+        "rate": 0.5,
+        "text": "3/6"
+      },
+      "filter_questions_hit3": {
+        "n": 0,
+        "N": 2,
+        "rate": 0.0,
+        "text": "0/2"
+      },
+      "filter_compliance": "N/A (no filter applied)",
+      "misses_hit3": [
+        "t01",
+        "t02",
+        "t04"
+      ],
+      "misses_hit1": [
+        "t01",
+        "t02",
+        "t03",
+        "t04",
+        "t05"
+      ]
+    },
+    "B": {
+      "hit1": {
+        "n": 5,
+        "N": 6,
+        "rate": 0.833,
+        "text": "5/6"
+      },
+      "evidence_hit3": {
+        "n": 5,
+        "N": 6,
+        "rate": 0.833,
+        "text": "5/6"
+      },
+      "page_hit3": {
+        "n": 6,
+        "N": 6,
+        "rate": 1.0,
+        "text": "6/6"
+      },
+      "filter_questions_hit3": {
+        "n": 1,
+        "N": 2,
+        "rate": 0.5,
+        "text": "1/2"
+      },
+      "filter_compliance": "N/A (no filter applied)",
+      "misses_hit3": [
+        "t02"
+      ],
+      "misses_hit1": [
+        "t02"
+      ]
+    },
+    "C": {
+      "hit1": {
+        "n": 5,
+        "N": 6,
+        "rate": 0.833,
+        "text": "5/6"
+      },
+      "evidence_hit3": {
+        "n": 5,
+        "N": 6,
+        "rate": 0.833,
+        "text": "5/6"
+      },
+      "page_hit3": {
+        "n": 6,
+        "N": 6,
+        "rate": 1.0,
+        "text": "6/6"
+      },
+      "filter_questions_hit3": {
+        "n": 1,
+        "N": 2,
+        "rate": 0.5,
+        "text": "1/2"
+      },
+      "filter_compliance": {
+        "n": 2,
+        "N": 2,
+        "rate": 1.0,
+        "text": "2/2"
+      },
+      "misses_hit3": [
+        "t02"
+      ],
+      "misses_hit1": [
+        "t02"
+      ]
+    }
+  }
+}

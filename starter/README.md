@@ -28,8 +28,8 @@ starter/
 ├── src/embeddings.py             # ✅ OpenRouter adapter (retry, đếm token/chi phí)
 ├── src/store.py                  # ✅ Qdrant: schema, upsert, xóa chunk cũ, search + filter
 ├── src/index.py                  # ✅ embed + nạp tăng dần, ghi index_log.jsonl
-├── src/evaluation.py             # TODO: Hit@1, Evidence Hit@3, trace
-├── src/run.py                    # TODO: điều phối A/B/C
+├── src/evaluation.py             # ✅ Hit@1, Evidence Hit@3, tuân thủ filter, chọn cấu hình
+├── src/run.py                    # ✅ chạy dev/test, chốt chặn quy trình test
 └── results/
     ├── ingestion_log.json        # thống kê + lỗi + mọi chỗ ghép chữ
     ├── chunk_stats.json          # số chunk, phân bố độ dài, độ phủ evidence trên dev
@@ -162,6 +162,35 @@ Thời gian phụ thuộc mạng tới OpenRouter và server Qdrant, nên chỉ 
 
 Cách hoạt động: `chunk_id` là UUID5 tính từ nội dung. Chunk không đổi giữ nguyên id nên được bỏ qua. Id có trong collection mà không còn trong chunking hiện tại sẽ bị xóa theo `document_id`, nên khi tài liệu thay đổi thì chunk cũ không còn sót lại.
 
-## 7. Các bước tiếp theo
+## 7. Truy xuất và chỉ số (bước 7)
 
-Chạy truy xuất top-3 cho 24 câu × 3 cấu hình và tính Hit@1/Evidence Hit@3: xem [GUIDE.md](../GUIDE.md).
+```bash
+python -m src.run --split dev     # A, B, C trên 18 câu dev
+python -m src.run --select        # áp tiêu chí đã chốt lên kết quả dev -> artifacts/selection_decision.json
+python -m src.run --split test    # đúng 1 lần, chỉ sau khi đã có quyết định
+```
+
+`run.py` **từ chối** chạy test khi chưa có quyết định dựa trên dev, và từ chối ghi đè kết quả test đã có. Query được embed một lần và dùng chung cho A/B/C (chi phí dev $0.00007, test $0.00003).
+
+**Định nghĩa hit:** chunk thuộc một trang trong `gold_pages` **và** chứa trọn `evidence_quote` (so sánh sau khi gộp khoảng trắng). `PageHit@3` (chỉ cần đúng trang) được báo thêm để chẩn đoán, không thay thế Evidence Hit@3.
+
+| Cấu hình | Split | Hit@1 | Evidence Hit@3 | Page Hit@3 | Câu filter Hit@3 | Tuân thủ filter |
+|---|---|---|---|---|---|---|
+| A | dev | 9/18 | 12/18 | 15/18 | 3/3 | N/A |
+| B | dev | 9/18 | 16/18 | 17/18 | 3/3 | N/A |
+| **C** | dev | **11/18** | **16/18** | 17/18 | 3/3 | 3/3 |
+| A | test | 1/6 | 3/6 | 3/6 | 0/2 | N/A |
+| B | test | 5/6 | 5/6 | 6/6 | 1/2 | N/A |
+| **C** | test | **5/6** | **5/6** | 6/6 | 1/2 | 2/2 |
+
+**Lựa chọn (chỉ dựa trên dev, commit `cf138a2` trước khi chạy test):** quy tắc 1 cho B = C = 16/18 Hit@3 (A = 12 bị loại); quy tắc 2 chọn **C** vì Hit@1 cao hơn (11 so với 9). Chi tiết: [artifacts/selection_decision.json](../artifacts/selection_decision.json).
+
+Trace đầy đủ (câu hỏi, top-3 chunk với text, score, metadata, nhãn đúng trang/có evidence/hit): `results/traces_dev.jsonl`, `results/traces_test.jsonl`. Chỉ số: `results/metrics_*.json`.
+
+**Trường hợp cần người chấm xem lại** (không tự đổi chỉ số):
+- **d05 (B, C):** top-1 là bảng so sánh ở tr.26, có cùng thông tin gõ dọc/gõ ngang dưới dạng cột, trong khi evidence văn xuôi nằm ở tr.25.
+- **t02 (B, C):** chunk định nghĩa ở top-1 (tr.78) nói "độ cắn chìa bình thường… nhưng độ cắn phủ tăng", tức là trả lời được câu hỏi, nhưng không chứa nguyên văn evidence. Đây là ứng viên "bằng chứng tương đương" theo GUIDE §4.
+
+## 8. Các bước tiếp theo
+
+Chấm tay coherence, metadata, grounding và viết báo cáo: xem [GUIDE.md](../GUIDE.md).
