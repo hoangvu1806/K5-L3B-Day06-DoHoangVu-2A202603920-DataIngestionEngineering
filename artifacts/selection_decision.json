@@ -1,0 +1,13 @@
+{
+  "chosen": [
+    "C"
+  ],
+  "steps": [
+    "Rule 1: dev Evidence Hit@3 = {A: 12, B: 16, C: 16}; within 1 of best (16): ['B', 'C']",
+    "Rule 2: dev Hit@1 among them = {B: 9, C: 11}; best: ['C']"
+  ],
+  "decided_at": "2026-11-14T03:46:35+00:00",
+  "based_on": "results/metrics_dev.json (dev split only)",
+  "criteria": "artifacts/selection_criteria.md",
+  "status": "decided"
+}

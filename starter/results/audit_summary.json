@@ -1,0 +1,75 @@
+{
+  "coherence": {
+    "A": {
+      "mean": 1.0,
+      "n": 10,
+      "dist": {
+        "0": 2,
+        "1": 6,
+        "2": 2
+      }
+    },
+    "B": {
+      "mean": 1.4,
+      "n": 10,
+      "dist": {
+        "0": 0,
+        "1": 6,
+        "2": 4
+      }
+    },
+    "C": {
+      "mean": 1.4,
+      "n": 10,
+      "dist": {
+        "0": 0,
+        "1": 6,
+        "2": 4
+      }
+    }
+  },
+  "metadata": {
+    "A": {
+      "correct_records": "18/18",
+      "filter_compliance": "N/A (no filter applied)"
+    },
+    "B": {
+      "correct_records": "18/18",
+      "filter_compliance": "N/A (no filter applied)"
+    },
+    "C": {
+      "correct_records": "18/18",
+      "filter_compliance": "6/6"
+    }
+  },
+  "grounding": {
+    "A": {
+      "mean": 1.33,
+      "n": 6,
+      "dist": {
+        "0": 1,
+        "1": 2,
+        "2": 3
+      }
+    },
+    "B": {
+      "mean": 1.83,
+      "n": 6,
+      "dist": {
+        "0": 0,
+        "1": 1,
+        "2": 5
+      }
+    },
+    "C": {
+      "mean": 1.83,
+      "n": 6,
+      "dist": {
+        "0": 0,
+        "1": 1,
+        "2": 5
+      }
+    }
+  },
+  "method": "Nhãn do tác giả chấm, 10 vị trí coherence (dòng IV. ĐIỀU TRỊ của bệnh 1-10) chọn cố định trước khi xem điểm; grounding và metadata trên 6 câu test × top-3 × 3 cấu hình."
+}

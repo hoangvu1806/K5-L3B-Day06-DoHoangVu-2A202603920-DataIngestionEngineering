@@ -1,0 +1,145 @@
+{
+  "run_at": "2026-11-14T03:45:33+00:00",
+  "split": "dev",
+  "n_questions": 18,
+  "top_k": 3,
+  "model": "google/gemini-embedding-2",
+  "dimensions": 3072,
+  "query_embedding_cost_usd": 7.4e-05,
+  "query_embedding_seconds": 28.8,
+  "summary": {
+    "A": {
+      "hit1": {
+        "n": 9,
+        "N": 18,
+        "rate": 0.5,
+        "text": "9/18"
+      },
+      "evidence_hit3": {
+        "n": 12,
+        "N": 18,
+        "rate": 0.667,
+        "text": "12/18"
+      },
+      "page_hit3": {
+        "n": 15,
+        "N": 18,
+        "rate": 0.833,
+        "text": "15/18"
+      },
+      "filter_questions_hit3": {
+        "n": 3,
+        "N": 3,
+        "rate": 1.0,
+        "text": "3/3"
+      },
+      "filter_compliance": "N/A (no filter applied)",
+      "misses_hit3": [
+        "d02",
+        "d04",
+        "d05",
+        "d06",
+        "d14",
+        "d17"
+      ],
+      "misses_hit1": [
+        "d02",
+        "d04",
+        "d05",
+        "d06",
+        "d08",
+        "d10",
+        "d12",
+        "d14",
+        "d17"
+      ]
+    },
+    "B": {
+      "hit1": {
+        "n": 9,
+        "N": 18,
+        "rate": 0.5,
+        "text": "9/18"
+      },
+      "evidence_hit3": {
+        "n": 16,
+        "N": 18,
+        "rate": 0.889,
+        "text": "16/18"
+      },
+      "page_hit3": {
+        "n": 17,
+        "N": 18,
+        "rate": 0.944,
+        "text": "17/18"
+      },
+      "filter_questions_hit3": {
+        "n": 3,
+        "N": 3,
+        "rate": 1.0,
+        "text": "3/3"
+      },
+      "filter_compliance": "N/A (no filter applied)",
+      "misses_hit3": [
+        "d05",
+        "d14"
+      ],
+      "misses_hit1": [
+        "d03",
+        "d05",
+        "d07",
+        "d08",
+        "d11",
+        "d12",
+        "d14",
+        "d16",
+        "d17"
+      ]
+    },
+    "C": {
+      "hit1": {
+        "n": 11,
+        "N": 18,
+        "rate": 0.611,
+        "text": "11/18"
+      },
+      "evidence_hit3": {
+        "n": 16,
+        "N": 18,
+        "rate": 0.889,
+        "text": "16/18"
+      },
+      "page_hit3": {
+        "n": 17,
+        "N": 18,
+        "rate": 0.944,
+        "text": "17/18"
+      },
+      "filter_questions_hit3": {
+        "n": 3,
+        "N": 3,
+        "rate": 1.0,
+        "text": "3/3"
+      },
+      "filter_compliance": {
+        "n": 3,
+        "N": 3,
+        "rate": 1.0,
+        "text": "3/3"
+      },
+      "misses_hit3": [
+        "d05",
+        "d14"
+      ],
+      "misses_hit1": [
+        "d03",
+        "d05",
+        "d11",
+        "d12",
+        "d14",
+        "d16",
+        "d17"
+      ]
+    }
+  }
+}

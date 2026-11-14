@@ -1,0 +1,19 @@
+question_id,strategy,top_k,fields_checked,correct_records,total_records,filter_required,filter_compliance,notes
+t01,A,3,"source,page,disease,section",3,3,yes,N/A (no filter applied),
+t02,A,3,"source,page,disease,section",3,3,yes,N/A (no filter applied),
+t03,A,3,"source,page,disease,section",3,3,no,N/A,
+t04,A,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t05,A,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t06,A,3,"source,page,disease,section",3,3,no,N/A,
+t01,B,3,"source,page,disease,section",3,3,yes,N/A (no filter applied),
+t02,B,3,"source,page,disease,section",3,3,yes,N/A (no filter applied),3 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t03,B,3,"source,page,disease,section",3,3,no,N/A,
+t04,B,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t05,B,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t06,B,3,"source,page,disease,section",3,3,no,N/A,
+t01,C,3,"source,page,disease,section",3,3,yes,3/3,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t02,C,3,"source,page,disease,section",3,3,yes,3/3,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t03,C,3,"source,page,disease,section",3,3,no,N/A,
+t04,C,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t05,C,3,"source,page,disease,section",3,3,no,N/A,1 chunk(s) có section=null (chunk bắt đầu trước tiêu đề mục tiếp)
+t06,C,3,"source,page,disease,section",3,3,no,N/A,
