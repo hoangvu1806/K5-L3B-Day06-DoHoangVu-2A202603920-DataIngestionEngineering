@@ -48,6 +48,8 @@ class OpenRouterEmbedder:
         self.tokens = 0
         self.cost_usd = 0.0
         self.calls = 0
+        # One keep-alive session: avoids a new TLS handshake per call.
+        self.session = requests.Session()
         # Probe once so the store can validate its vector size up front.
         self.dimensions = len(self._post(["dimension probe"])[0])
 
@@ -55,7 +57,7 @@ class OpenRouterEmbedder:
         delay = 2.0
         for attempt in range(self.max_retries + 1):
             try:
-                resp = requests.post(
+                resp = self.session.post(
                     OPENROUTER_URL,
                     headers={"Authorization": f"Bearer {self.api_key}"},
                     json={"model": self.model_name, "input": texts},

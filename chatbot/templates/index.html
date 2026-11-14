@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>RHM RAG · Tra cứu Răng Hàm Mặt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root {
+  /* Light clinical palette (no dark mode): white, mint tint, teal accent */
+  color-scheme: light;
+  --bg: #ffffff;
+  --page: #f6fbfa;
+  --tint: #eef6f5;
+  --tint-2: #dcebe8;
+  --line: #e3eeec;
+  --text: #13302d;
+  --muted: #5a716d;
+  --faint: #98aaa7;
+  --accent: #0f8a8f;
+  --accent-ink: #0b6f73;
+  --accent-soft: #e5f4f4;
+  --ok: #1e7a3c;
+  --warn: #a35c00;
+  --err: #c0362c;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--page); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; letter-spacing: -0.003em; -webkit-font-smoothing: antialiased; }
+button, select { font: inherit; color: inherit; }
+.app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; width: 100%; padding: 0 clamp(16px, 3vw, 48px); background: var(--bg); }
+
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 22px 0 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.cross { width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.subtitle { font-size: 12.5px; color: var(--muted); margin-top: 3px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.status { display: inline-flex; align-items: center; gap: 6px; }
+.status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+.status.ready::before { background: var(--ok); }
+.status.warming::before { background: var(--warn); animation: pulse 1s ease-in-out infinite; }
+.status.failed::before { background: var(--err); }
+@keyframes pulse { 50% { opacity: .3; } }
+
+.controls { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-size: 11.5px; font-weight: 500; color: var(--muted); }
+.control select { background: var(--bg); border: 1px solid var(--tint-2); border-radius: 10px; padding: 7px 10px; font-size: 13.5px; color: var(--text); min-width: 0; cursor: pointer; }
+#disease { width: 250px; text-overflow: ellipsis; }
+#topk { width: 64px; }
+.control select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+main { overflow-y: auto; padding: 16px 0 24px; scrollbar-width: thin; scrollbar-color: var(--tint-2) transparent; }
+
+.disclaimer { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+.disclaimer strong { color: var(--text); }
+
+.intro p { margin: 0 0 16px; color: var(--muted); max-width: 60ch; }
+.scope { font-size: 12px; font-weight: 600; color: var(--faint); margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .06em; }
+.samples { list-style: none; margin: 0; padding: 0; }
+.samples button { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: baseline; border: 0; background: none; text-align: left; padding: 10px 12px; margin: 0 -12px; width: calc(100% + 24px); border-radius: 10px; cursor: pointer; }
+.samples button:hover { background: var(--tint); }
+.samples button:focus-visible { outline: 2px solid var(--accent); }
+.samples .lvl { font-size: 12px; font-weight: 500; color: var(--accent); }
+
+.turn { padding: 22px 0; }
+.turn + .turn { border-top: 1px dashed var(--line); }
+.q { background: var(--accent-soft); color: var(--text); border-radius: 16px 16px 4px 16px; padding: 10px 16px; margin-left: auto; width: fit-content; max-width: min(70%, 900px); white-space: pre-wrap; overflow-wrap: anywhere; font-weight: 500; }
+.a { margin-top: 16px; }
+.a-meta { display: none; }
+.a-meta .st-ok { color: var(--ok); }
+.a-meta .st-run { color: var(--warn); }
+.a-meta .st-err { color: var(--err); }
+.a-meta .dot::before { content: '●'; margin-right: 6px; font-size: 9px; vertical-align: 1px; }
+
+.md { overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md h1, .md h2, .md h3, .md h4 { font-size: 15px; font-weight: 600; margin: 20px 0 6px; }
+.md p { margin: 8px 0; }
+.md ul, .md ol { margin: 8px 0; padding-left: 20px; }
+.md li { margin: 3px 0; }
+.md li::marker { color: var(--faint); }
+.md strong { font-weight: 600; color: var(--accent-ink); }
+.md a { color: var(--accent); text-decoration: none; }
+.md code { font-family: var(--mono); font-size: 12.5px; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+.md pre { background: var(--tint); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+.md blockquote { margin: 10px 0; padding: 8px 14px; background: var(--tint); border-radius: 8px; color: var(--muted); }
+.md .cite { font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 999px; white-space: nowrap; vertical-align: 1px; }
+.caret { display: inline-block; width: 7px; height: 15px; background: var(--accent); margin-left: 2px; vertical-align: -2px; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Compact, low-key expandable panels (retrieval details, prompt, sources) */
+.panels { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: flex-start; }
+.panel { font-size: 12px; line-height: 1.5; }
+.panels > .panel[open] { flex-basis: 100%; }
+.panel > summary { list-style: none; cursor: pointer; font-size: 11.5px; font-weight: 500; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); user-select: none; }
+.panel > summary:hover { background: var(--tint); color: var(--text); }
+.panel[open] > summary { background: var(--tint); color: var(--text); }
+.panel > summary::-webkit-details-marker { display: none; }
+.panel > summary .chev { display: inline-block; font-size: 10px; transition: transform .15s; color: var(--faint); }
+.panel[open] > summary .chev { transform: rotate(90deg); }
+.panel-body { margin-top: 6px; padding: 8px 10px; border-radius: 10px; background: var(--page); border: 1px solid var(--line); }
+
+.kv { display: grid; grid-template-columns: 84px 1fr; gap: 2px 10px; margin: 0; font-size: 12px; }
+.kv dt { color: var(--faint); }
+.kv dd { margin: 0; overflow-wrap: anywhere; color: var(--muted); }
+.kv .query { font-weight: 600; color: var(--text); }
+.kv .note-inline { color: var(--faint); font-size: 11px; margin-left: 6px; }
+.prompt { margin-top: 6px; }
+.prompt > summary { font-size: 11px; padding: 1px 8px; }
+.prompt pre { margin: 6px 0 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 10.5px; line-height: 1.5; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); }
+.prompt .role { color: var(--accent); font-weight: 500; }
+
+.src-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+/* Each chunk is collapsed to one line; click to expand the full text */
+.src { background: var(--bg); border: 1px solid var(--line); border-left: 2px solid var(--accent); border-radius: 8px; }
+.src > summary { list-style: none; cursor: pointer; padding: 5px 10px; display: grid; grid-template-columns: auto 1fr; gap: 0 8px; align-items: baseline; border-radius: 8px; }
+.src > summary::-webkit-details-marker { display: none; }
+.src > summary:hover { background: var(--tint); }
+.src > summary .chev { font-size: 10px; color: var(--faint); transition: transform .15s; }
+.src[open] > summary .chev { transform: rotate(90deg); }
+.src[open] > summary { border-bottom: 1px dashed var(--line); border-radius: 8px 8px 0 0; }
+.src-head { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--faint); min-width: 0; }
+.src-head .cite { color: var(--accent); font-weight: 600; }
+.src-head .sep { color: var(--tint-2); }
+.src-preview { grid-column: 2; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.src[open] .src-preview { display: none; }
+.src-text { font-size: 12.5px; line-height: 1.6; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; padding: 8px 12px 10px 28px; }
+
+.thinking { font-size: 13px; color: var(--muted); }
+.thinking::after { content: ''; animation: dots 1.4s steps(4) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+.error-msg { color: var(--err); }
+
+footer { padding: 14px 0 20px; border-top: 1px solid var(--line); }
+.composer { display: flex; gap: 8px; align-items: flex-end; background: var(--bg); border: 1px solid var(--tint-2); border-radius: 16px; padding: 8px 8px 8px 16px; transition: border-color .15s, box-shadow .15s; }
+.composer:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.composer textarea { flex: 1; border: 0; outline: 0; resize: none; background: none; color: var(--text); font: inherit; max-height: 160px; padding: 7px 0; }
+.composer textarea::placeholder { color: var(--faint); }
+.send { border: 0; background: var(--accent); color: #fff; font-weight: 600; font-size: 14px; padding: 8px 20px; border-radius: 12px; cursor: pointer; }
+.send:hover { background: var(--accent-ink); }
+.send:disabled { opacity: .4; cursor: default; }
+.note { font-size: 12px; color: var(--faint); margin-top: 8px; }
+
+@media (max-width: 600px) {
+  header { padding-top: 16px; }
+  .samples button { grid-template-columns: 1fr; gap: 2px; }
+  .q { max-width: 92%; }
+  #disease { width: 100%; max-width: 250px; }
+  .kv { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="brand">
+        <span class="cross" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg>
+        </span>
+        <h1 class="title">RHM RAG</h1>
+      </div>
+      <div class="subtitle">
+        <span>Hướng dẫn Răng Hàm Mặt · QĐ 3108/QĐ-BYT · 2015</span>
+        <span class="status warming" id="status">đang khởi động</span>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <label for="disease">Bệnh (lọc)</label>
+        <select id="disease">
+          <option value="">— Mọi bệnh —</option>
+          {% for d in diseases %}<option value="{{ d.no }}">{{ d.no }}. {{ d.title }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="control">
+        <label for="topk">Top-k</label>
+        <select id="topk">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main id="chat">
+    <div class="disclaimer">
+      <strong>Lưu ý:</strong> công cụ chỉ tra cứu nội dung tài liệu hướng dẫn chuyên môn do Bộ Y tế ban hành. <strong>Không thay thế bác sĩ</strong> và không đưa chẩn đoán cho người bệnh cụ thể.
+    </div>
+    <section class="intro" id="intro">
+      <p>Hỏi bằng tiếng Việt về chẩn đoán, điều trị, phòng bệnh… cho 57 bệnh trong tài liệu. Chọn "Bệnh (lọc)" để chỉ tìm trong một bệnh.</p>
+      <p class="scope">Ví dụ</p>
+      <ul class="samples">
+        {% for s in samples %}<li><button type="button" data-q="{{ s.q }}" data-disease="{{ s.disease or '' }}"><span class="lvl">{% if s.disease %}bệnh {{ s.disease }}{% else %}mọi bệnh{% endif %}</span><span>{{ s.q }}</span></button></li>{% endfor %}
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <form class="composer" id="form">
+      <textarea id="input" rows="1" placeholder="Hỏi về chẩn đoán, điều trị, phòng bệnh…" aria-label="Câu hỏi"></textarea>
+      <button class="send" id="send" type="submit">Hỏi</button>
+    </form>
+  </footer>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const diseaseSel = document.getElementById('disease');
+const topkSel = document.getElementById('topk');
+const statusEl = document.getElementById('status');
+
+marked.setOptions({ gfm: true, breaks: false });
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function renderMarkdown(target, text, streaming) {
+  const html = DOMPurify.sanitize(marked.parse(text || ''));
+  // Turn [#n] into small citation chips (after sanitising).
+  target.innerHTML = html.replace(/\[#(\d+)\]/g, '<span class="cite">#$1</span>');
+  target.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+  if (streaming) {
+    const last = target.lastElementChild || target;
+    last.appendChild(el('span', 'caret'));
+  }
+}
+
+// ---------------------------------------------------------------- warmup status
+async function pollHealth() {
+  for (let i = 0; i < 60; i++) {
+    try {
+      const r = await fetch('/api/health');
+      const h = await r.json();
+      if (h.ready) {
+        statusEl.className = 'status ready';
+        statusEl.textContent = 'sẵn sàng';
+        statusEl.title = `warmup: embed ${h.embed_s}s · qdrant ${h.qdrant_s}s · chat ${h.chat_s}s`;
+        return;
+      }
+      if (h.error) {
+        statusEl.className = 'status failed';
+        statusEl.textContent = 'khởi động lỗi';
+        statusEl.title = h.error;
+        return;
+      }
+    } catch (e) { /* server still starting */ }
+    await new Promise(r => setTimeout(r, 1000));
+  }
+}
+pollHealth();
+
+// ---------------------------------------------------------------- panels
+function sourceHead(s) {
+  const head = el('div', 'src-head');
+  const add = (cls, text) => { head.appendChild(el('span', 'sep', '·')); head.appendChild(el('span', cls, text)); };
+  head.appendChild(el('span', 'cite', '[' + s.citation + ']'));
+  if (s.disease_no) add(null, 'Bệnh ' + s.disease_no + '. ' + s.disease);
+  else if (s.special_id) add(null, s.section || s.special_id);
+  if (s.section && s.disease_no) add(null, s.section);
+  if (s.subsection) add(null, s.subsection);
+  add(null, 'trang ' + (s.pages || []).join(', '));
+  add(null, 'score ' + s.score);
+  return head;
+}
+
+function renderSources(sources) {
+  const d = el('details', 'panel');
+  const sm = el('summary');
+  sm.appendChild(el('span', 'chev', '›'));
+  sm.appendChild(el('span', null, sources.length + ' nguồn'));
+  d.appendChild(sm);
+  const bodyEl = el('div', 'panel-body');
+  const list = el('ul', 'src-list');
+  sources.forEach(s => {
+    // Collapsed: header + one-line preview. Click to read the full chunk.
+    const li = el('li');
+    const item = el('details', 'src');
+    const head = el('summary');
+    head.appendChild(el('span', 'chev', '›'));
+    head.appendChild(sourceHead(s));
+    head.appendChild(el('span', 'src-preview', (s.text || '').replace(/\s+/g, ' ').trim()));
+    item.appendChild(head);
+    item.appendChild(el('div', 'src-text', s.text));
+    li.appendChild(item);
+    list.appendChild(li);
+  });
+  bodyEl.appendChild(list);
+  d.appendChild(bodyEl);
+  return d;
+}
+
+function renderRetrieval(info, prompt, retrievalS) {
+  const d = el('details', 'panel');
+  const sm = el('summary');
+  sm.appendChild(el('span', 'chev', '›'));
+  sm.appendChild(el('span', null, 'Truy vấn retrieval'));
+  d.appendChild(sm);
+  const bodyEl = el('div', 'panel-body');
+
+  const kv = el('dl', 'kv');
+  const row = (k, v) => { kv.appendChild(el('dt', null, k)); const dd = el('dd'); if (v instanceof Node) dd.appendChild(v); else dd.textContent = v; kv.appendChild(dd); };
+  const q = el('span');
+  q.appendChild(el('span', 'query', info.query));
+  q.appendChild(el('span', 'note-inline', info.query_rewritten ? '(LLM viết lại)' : '(nguyên văn)'));
+  row('query', q);
+  row('cấu hình', (info.strategy === 'C' ? 'C · lọc bệnh ' + info.filter.disease_no : 'B · không lọc') + ' · top-' + info.top_k);
+  row('vector store', info.collection + ' · ' + info.search);
+  row('embedding', info.embedding_model);
+  row('thời gian', retrievalS + ' s');
+  bodyEl.appendChild(kv);
+
+  if (prompt && prompt.length) {
+    const p = el('details', 'panel prompt');
+    const ps = el('summary');
+    ps.appendChild(el('span', 'chev', '›'));
+    ps.appendChild(el('span', null, 'prompt gửi LLM'));
+    p.appendChild(ps);
+    const pre = el('pre');
+    prompt.forEach((m, i) => {
+      if (i) pre.appendChild(document.createTextNode('\n\n'));
+      pre.appendChild(el('span', 'role', '── ' + m.role + ' ──'));
+      pre.appendChild(document.createTextNode('\n' + m.content));
+    });
+    p.appendChild(pre);
+    bodyEl.appendChild(p);
+  }
+  d.appendChild(bodyEl);
+  return d;
+}
+
+// ---------------------------------------------------------------- SSE reader
+async function* sseEvents(response) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buf = '';
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf('\n\n')) >= 0) {
+      const block = buf.slice(0, idx);
+      buf = buf.slice(idx + 2);
+      let event = 'message', data = '';
+      block.split('\n').forEach(line => {
+        if (line.startsWith('event:')) event = line.slice(6).trim();
+        else if (line.startsWith('data:')) data += line.slice(5).trim();
+      });
+      if (data) yield { event, data: JSON.parse(data) };
+    }
+  }
+}
+
+input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; });
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } });
+form.addEventListener('submit', e => { e.preventDefault(); ask(); });
+document.querySelectorAll('.samples button').forEach(b => b.addEventListener('click', () => {
+  input.value = b.dataset.q;
+  diseaseSel.value = b.dataset.disease || '';
+  ask();
+}));
+
+async function ask() {
+  const query = input.value.trim();
+  if (!query || sendBtn.disabled) return;
+  document.getElementById('intro')?.remove();
+  input.value = '';
+  input.style.height = 'auto';
+  const diseaseNo = diseaseSel.value ? parseInt(diseaseSel.value, 10) : null;
+  const topK = parseInt(topkSel.value, 10);
+
+  const turn = el('section', 'turn');
+  turn.appendChild(el('div', 'q', query));
+  const answer = el('div', 'a');
+  const meta = el('div', 'a-meta');
+  const stateEl = el('span', 'dot st-run', 'đang tìm tài liệu');
+  meta.appendChild(stateEl);
+  answer.appendChild(meta);
+  const body = el('div', 'md');
+  const thinking = el('div', 'thinking', 'đang tra cứu' + (diseaseNo ? ' · bệnh ' + diseaseNo : ''));
+  body.appendChild(thinking);
+  answer.appendChild(body);
+  const panels = el('div', 'panels');
+  answer.appendChild(panels);
+  turn.appendChild(answer);
+  chat.appendChild(turn);
+  turn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  sendBtn.disabled = true;
+
+  let text = '';
+  let pending = false;
+  let finished = false;
+  let sourcesPanel = null;
+  const paint = (streaming) => { renderMarkdown(body, text, streaming); };
+  // A frame scheduled before 'done' must not repaint the caret afterwards.
+  const schedule = () => { if (pending) return; pending = true; requestAnimationFrame(() => { pending = false; if (!finished) paint(true); }); };
+  const finish = () => { finished = true; paint(false); };
+
+  try {
+    const res = await fetch('/api/ask/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, disease_no: diseaseNo, top_k: topK }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(typeof data.detail === 'string' ? data.detail : 'Yêu cầu không hợp lệ (' + res.status + ').');
+    }
+    for await (const { event, data } of sseEvents(res)) {
+      if (event === 'meta') {
+        meta.appendChild(el('span', null, 'cấu hình ' + data.strategy));
+        if (data.disease_no) meta.appendChild(el('span', null, 'lọc bệnh ' + data.disease_no));
+        meta.appendChild(el('span', null, 'top-' + data.top_k));
+        meta.appendChild(el('span', null, data.model));
+      } else if (event === 'sources') {
+        stateEl.textContent = 'đang trả lời';
+        thinking.textContent = 'đang viết câu trả lời';
+        panels.appendChild(renderRetrieval(data.retrieval, data.prompt, data.retrieval_s));
+        sourcesPanel = renderSources(data.sources);
+        panels.appendChild(sourcesPanel);
+      } else if (event === 'delta') {
+        text += data.text;
+        schedule();
+      } else if (event === 'done') {
+        finish();
+        // Greetings / refusals cite nothing: hide the sources chip to avoid noise.
+        if (sourcesPanel && !/\[#\d+\]/.test(text)) sourcesPanel.remove();
+        stateEl.className = 'dot st-ok';
+        stateEl.textContent = 'xong';
+        if (data.first_token_s !== null) meta.appendChild(el('span', null, 'token đầu ' + data.first_token_s + 's'));
+        meta.appendChild(el('span', null, 'tổng ' + data.seconds + 's'));
+        if (data.tokens) meta.appendChild(el('span', null, data.tokens.toLocaleString('vi-VN') + ' tokens'));
+        if (data.cost_usd !== null && data.cost_usd !== undefined) meta.appendChild(el('span', null, '$' + Number(data.cost_usd).toFixed(5)));
+      } else if (event === 'error') {
+        throw new Error(data.detail);
+      }
+    }
+    finish();
+  } catch (err) {
+    finished = true;
+    stateEl.className = 'dot st-err';
+    stateEl.textContent = 'lỗi';
+    if (!text) body.innerHTML = '';
+    body.appendChild(el('p', 'error-msg', err.message || 'Không kết nối được server.'));
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+</script>
+</body>
+</html>
