@@ -6,7 +6,7 @@ Chatbot tra cứu [tài liệu hướng dẫn Răng Hàm Mặt](../data/manifest
 - **UI:** FastAPI + Jinja2 + HTML tĩnh (cùng kiểu template như Day 04 ReAct Loop Agent)
 - **Retrieval:** dùng lại `starter/src/{embeddings,store}.py` — Qdrant + `google/gemini-embedding-2` (3072 chiều), chiến lược C (B + filter `disease_no` khi người dùng chọn bệnh)
 - **Sinh câu trả lời:** `deepseek/deepseek-v4.1-flash` qua OpenRouter (giống Day 04)
-- **Giao diện:** chỉ tông sáng (trắng, nền mint nhạt, teal), dấu chữ thập y tế, disclaimer
+- **Giao diện:** chỉ tông sáng (trắng, nền mint nhạt, teal), font Be Vietnam Pro (thiết kế cho tiếng Việt) + JetBrains Mono cho prompt, dấu chữ thập y tế, disclaimer; phần retrieval và nguồn là nhãn dạng viên nhỏ, mặc định đóng, mở ra thì chữ nhỏ và nhạt
 - **Streaming:** `POST /api/ask/stream` trả Server-Sent Events: `meta` → `sources` (ngay sau retrieval) → `delta` (từng đoạn chữ) → `done` (token, chi phí, thời gian); lỗi trả `error`
 - **Warmup:** khi server khởi động, gọi thử embed + Qdrant (B và C) + chat 1 token; dùng session HTTP keep-alive. Trạng thái ở `GET /api/health`, hiển thị chấm xanh "sẵn sàng" trên header
 - **Xem truy vấn retrieval:** mục mở rộng dưới mỗi câu trả lời hiện câu query đã embed (nguyên văn câu hỏi, không có bước LLM viết lại), cấu hình B/C, collection, filter, top-k, và toàn bộ prompt gửi LLM
