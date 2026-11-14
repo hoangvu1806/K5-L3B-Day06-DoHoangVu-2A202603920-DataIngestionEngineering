@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RHM RAG · Tra cứu Răng Hàm Mặt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root {
+  /* Medical palette: soft clinical white, teal accent, red alerts */
+  --bg: #f7faf9;
+  --tint: #ebf3f1;
+  --tint-2: #d9e6e3;
+  --text: #0e1f1d;
+  --muted: #5c706d;
+  --faint: #9ca8a6;
+  --accent: #0d7c82;        /* teal */
+  --accent-soft: #e6f3f4;
+  --ok: #1e7a3c;
+  --warn: #a35c00;
+  --err: #b42318;
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1615; --tint: #17201f; --tint-2: #233130;
+    --text: #e8efed; --muted: #9bada9; --faint: #607470;
+    --accent: #6ac4c9; --accent-soft: #1c2a2a;
+    --ok: #6fcf8a; --warn: #f0b45a; --err: #ff8a80;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1615; --tint: #17201f; --tint-2: #233130;
+  --text: #e8efed; --muted: #9bada9; --faint: #607470;
+  --accent: #6ac4c9; --accent-soft: #1c2a2a;
+  --ok: #6fcf8a; --warn: #f0b45a; --err: #ff8a80;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+button, select { font: inherit; color: inherit; }
+.app { display: grid; grid-template-rows: auto 1fr auto; height: 100vh; max-width: 820px; margin: 0 auto; padding: 0 16px; }
+
+header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 24px 0 16px; flex-wrap: wrap; border-bottom: 1px solid var(--tint); }
+.brand { display: flex; align-items: center; gap: 10px; }
+.caduceus { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.title { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+.subtitle { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 2px; }
+.pill { display: inline-block; font-family: var(--mono); font-size: 11px; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 999px; margin-left: 6px; letter-spacing: .04em; }
+
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.control { display: flex; flex-direction: column; gap: 4px; }
+.control label { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.control select { background: var(--tint); border: 1px solid transparent; border-radius: 8px; padding: 6px 10px; font-size: 13.5px; color: var(--text); min-width: 180px; cursor: pointer; }
+.control select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+main { overflow-y: auto; padding: 16px 0 24px; scrollbar-width: thin; scrollbar-color: var(--tint-2) transparent; }
+
+.disclaimer { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 10px 14px; border-radius: 6px; font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+.disclaimer strong { color: var(--text); }
+
+.intro p { margin: 0 0 16px; color: var(--muted); max-width: 60ch; }
+.scope { font-family: var(--mono); font-size: 12px; color: var(--faint); margin: 12px 0 6px; text-transform: uppercase; letter-spacing: .06em; }
+.samples { list-style: none; margin: 0; padding: 0; }
+.samples button { display: grid; grid-template-columns: 110px 1fr; gap: 12px; width: 100%; border: 0; background: none; text-align: left; padding: 10px 12px; margin: 0 -12px; width: calc(100% + 24px); border-radius: 8px; cursor: pointer; }
+.samples button:hover { background: var(--tint); }
+.samples button:focus-visible { outline: 2px solid var(--accent); }
+.samples .lvl { font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 2px; }
+
+.turn { padding: 22px 0; }
+.turn + .turn { margin-top: 4px; border-top: 1px dashed var(--tint); }
+.q { background: var(--tint); border-radius: 10px; padding: 10px 14px; margin-left: auto; width: fit-content; max-width: 85%; white-space: pre-wrap; overflow-wrap: anywhere; }
+.a { margin-top: 18px; }
+.a-meta { display: flex; flex-wrap: wrap; gap: 14px; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.a-meta .st-ok { color: var(--ok); }
+.a-meta .st-err { color: var(--err); }
+.a-meta .dot::before { content: '●'; margin-right: 6px; font-size: 9px; vertical-align: 1px; }
+
+.md { overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md h1, .md h2, .md h3, .md h4 { font-size: 15px; font-weight: 600; margin: 22px 0 6px; letter-spacing: -0.005em; }
+.md p { margin: 8px 0; }
+.md ul, .md ol { margin: 8px 0; padding-left: 20px; }
+.md li { margin: 3px 0; }
+.md li::marker { color: var(--faint); }
+.md strong { font-weight: 600; }
+.md a { color: var(--accent); text-decoration: none; }
+.md a:hover { text-decoration: underline; }
+.md code { font-family: var(--mono); font-size: 12.5px; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+.md pre { background: var(--tint); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+.md pre code { background: none; padding: 0; }
+.md blockquote { margin: 10px 0; padding: 8px 14px; background: var(--tint); border-radius: 8px; color: var(--muted); }
+.md blockquote p { margin: 0; }
+.md hr { border: 0; height: 12px; }
+
+.sources { margin-top: 16px; }
+.sources summary { list-style: none; cursor: pointer; font-family: var(--mono); font-size: 12px; color: var(--muted); display: inline-flex; gap: 8px; align-items: center; padding: 4px 8px; margin-left: -8px; border-radius: 6px; }
+.sources summary:hover { background: var(--tint); }
+.sources summary::-webkit-details-marker { display: none; }
+.sources summary .chev { display: inline-block; transition: transform .15s; }
+.sources[open] summary .chev { transform: rotate(90deg); }
+.src-list { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.src { background: var(--tint); border-radius: 8px; padding: 10px 12px; border-left: 3px solid var(--accent); }
+.src-head { display: flex; gap: 10px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.src-head .cite { color: var(--accent); font-weight: 500; }
+.src-head .sep { color: var(--faint); }
+.src-text { font-size: 13.5px; color: var(--text); max-height: 140px; overflow: auto; white-space: pre-wrap; }
+
+.thinking { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-top: 18px; }
+.thinking::after { content: ''; animation: dots 1.4s steps(4) infinite; }
+@keyframes dots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+.error-msg { color: var(--err); }
+
+footer { padding: 12px 0 20px; }
+.composer { display: flex; gap: 8px; align-items: flex-end; background: var(--tint); border-radius: 12px; padding: 8px 8px 8px 16px; border: 1px solid transparent; transition: border-color .15s; }
+.composer:focus-within { border-color: var(--accent); }
+.composer textarea { flex: 1; border: 0; outline: 0; resize: none; background: none; color: var(--text); font: inherit; max-height: 160px; padding: 7px 0; }
+.composer textarea::placeholder { color: var(--faint); }
+.send { border: 0; background: var(--accent); color: #fff; font-weight: 500; font-size: 14px; padding: 8px 18px; border-radius: 8px; cursor: pointer; }
+.send:disabled { opacity: .4; cursor: default; }
+.send:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { font-size: 12px; color: var(--faint); margin-top: 8px; }
+
+@media (max-width: 600px) {
+  header { padding-top: 18px; }
+  .samples button { grid-template-columns: 1fr; gap: 2px; }
+  .q { max-width: 92%; }
+  .control select { min-width: 140px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <div class="brand">
+        <svg class="caduceus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2v20"/><path d="M8 6c0 4 8 4 8 8s-8 4-8 8"/><path d="M16 6c0 4-8 4-8 8s8 4 8 8"/>
+        </svg>
+        <h1 class="title">RHM RAG <span class="pill">beta</span></h1>
+      </div>
+      <div class="subtitle">Tra cứu hướng dẫn Răng Hàm Mặt · QĐ 3108/QĐ-BYT · Bộ Y tế 2015</div>
+    </div>
+    <div class="controls">
+      <div class="control">
+        <label for="disease">Bệnh (lọc)</label>
+        <select id="disease">
+          <option value="">— Mọi bệnh —</option>
+          {% for d in diseases %}<option value="{{ d.no }}">{{ d.no }}. {{ d.title }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="control">
+        <label for="topk">Top-k</label>
+        <select id="topk">
+          <option value="3">3</option>
+          <option value="5" selected>5</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main id="chat">
+    <div class="disclaimer">
+      <strong>Lưu ý:</strong> công cụ chỉ tra cứu nội dung tài liệu hướng dẫn chuyên môn do Bộ Y tế ban hành. <strong>Không thay thế bác sĩ</strong> và không đưa chẩn đoán cho người bệnh cụ thể.
+    </div>
+    <section class="intro" id="intro">
+      <p>Hỏi bằng tiếng Việt về chẩn đoán, điều trị, phòng bệnh… cho 57 bệnh trong tài liệu. Chọn "Bệnh (lọc)" bên trên nếu muốn giới hạn tìm kiếm trong một bệnh cụ thể (chiến lược C).</p>
+      <p class="scope">Ví dụ</p>
+      <ul class="samples">
+        {% for s in samples %}<li><button type="button" data-q="{{ s.q }}" data-disease="{{ s.disease or '' }}"><span class="lvl">{% if s.disease %}bệnh {{ s.disease }}{% else %}mọi bệnh{% endif %}</span><span>{{ s.q }}</span></button></li>{% endfor %}
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <form class="composer" id="form">
+      <textarea id="input" rows="1" placeholder="Hỏi về chẩn đoán, điều trị, phòng bệnh…" aria-label="Câu hỏi"></textarea>
+      <button class="send" id="send" type="submit">Hỏi</button>
+    </form>
+    <div class="note">Mỗi câu hỏi là một lượt độc lập (không nhớ ngữ cảnh). Trả lời bám theo tài liệu và trích nguồn [#n].</div>
+  </footer>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+const diseaseSel = document.getElementById('disease');
+const topkSel = document.getElementById('topk');
+
+marked.setOptions({ gfm: true, breaks: false });
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function renderMarkdown(text) {
+  const wrap = el('div', 'md');
+  wrap.innerHTML = DOMPurify.sanitize(marked.parse(text || ''));
+  wrap.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+  return wrap;
+}
+
+function sourceLine(s) {
+  const bits = [el('span', 'cite', '[' + s.citation + ']')];
+  if (s.disease_no) {
+    bits.push(el('span', 'sep', '·'));
+    bits.push(el('span', null, 'Bệnh ' + s.disease_no + '. ' + s.disease));
+  } else if (s.special_id) {
+    bits.push(el('span', 'sep', '·'));
+    bits.push(el('span', null, s.section || s.special_id));
+  }
+  if (s.section && s.disease_no) {
+    bits.push(el('span', 'sep', '·'));
+    bits.push(el('span', null, s.section));
+  }
+  if (s.subsection) {
+    bits.push(el('span', 'sep', '·'));
+    bits.push(el('span', null, s.subsection));
+  }
+  bits.push(el('span', 'sep', '·'));
+  bits.push(el('span', null, 'trang ' + (s.pages || []).join(', ')));
+  bits.push(el('span', 'sep', '·'));
+  bits.push(el('span', null, 'score ' + s.score));
+  const head = el('div', 'src-head');
+  bits.forEach(b => head.appendChild(b));
+  return head;
+}
+
+function renderSources(sources) {
+  const details = el('details', 'sources');
+  details.open = true;
+  const summary = el('summary');
+  summary.appendChild(el('span', 'chev', '›'));
+  summary.appendChild(el('span', null, 'Nguồn trích dẫn · ' + sources.length + ' đoạn'));
+  details.appendChild(summary);
+  const list = el('ul', 'src-list');
+  sources.forEach(s => {
+    const item = el('li', 'src');
+    item.appendChild(sourceLine(s));
+    item.appendChild(el('div', 'src-text', s.text));
+    list.appendChild(item);
+  });
+  details.appendChild(list);
+  return details;
+}
+
+input.addEventListener('input', () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; });
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } });
+form.addEventListener('submit', e => { e.preventDefault(); ask(); });
+
+document.querySelectorAll('.samples button').forEach(b => b.addEventListener('click', () => {
+  input.value = b.dataset.q;
+  diseaseSel.value = b.dataset.disease || '';
+  ask();
+}));
+
+async function ask() {
+  const query = input.value.trim();
+  if (!query || sendBtn.disabled) return;
+  document.getElementById('intro')?.remove();
+  input.value = '';
+  input.style.height = 'auto';
+
+  const diseaseNo = diseaseSel.value ? parseInt(diseaseSel.value, 10) : null;
+  const topK = parseInt(topkSel.value, 10);
+
+  const turn = el('section', 'turn');
+  turn.appendChild(el('div', 'q', query));
+  const thinking = el('div', 'thinking', 'đang tra cứu' + (diseaseNo ? ' · bệnh ' + diseaseNo : ''));
+  turn.appendChild(thinking);
+  chat.appendChild(turn);
+  turn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  sendBtn.disabled = true;
+
+  const answer = el('div', 'a');
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, disease_no: diseaseNo, top_k: topK }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      answer.appendChild(el('p', 'error-msg', typeof data.detail === 'string' ? data.detail : 'Yêu cầu không hợp lệ.'));
+    } else {
+      const meta = el('div', 'a-meta');
+      meta.appendChild(el('span', 'dot st-ok', 'strategy ' + data.strategy));
+      if (data.disease_no) meta.appendChild(el('span', null, 'filter bệnh ' + data.disease_no));
+      meta.appendChild(el('span', null, 'top-' + data.top_k));
+      meta.appendChild(el('span', null, data.model));
+      if (data.tokens) meta.appendChild(el('span', null, data.tokens.toLocaleString('vi-VN') + ' tokens'));
+      if (data.cost_usd !== null && data.cost_usd !== undefined) meta.appendChild(el('span', null, '$' + data.cost_usd.toFixed(5)));
+      meta.appendChild(el('span', null, data.seconds + 's'));
+      answer.appendChild(meta);
+      answer.appendChild(renderMarkdown(data.answer || '_Không có câu trả lời._'));
+      if (data.sources && data.sources.length) answer.appendChild(renderSources(data.sources));
+    }
+  } catch (err) {
+    answer.appendChild(el('p', 'error-msg', 'Không kết nối được server.'));
+  } finally {
+    thinking.remove();
+    turn.appendChild(answer);
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+</script>
+</body>
+</html>
