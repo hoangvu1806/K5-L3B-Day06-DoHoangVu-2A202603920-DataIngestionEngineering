@@ -2,6 +2,9 @@
 
 **Lab cá nhân** · **4 giờ** · **Dữ liệu tự chọn**
 
+> **Bài nộp:** Đỗ Hoàng Vũ · MSSV 2A202603920 · L3B. Xem [`STUDENT.md`](STUDENT.md), báo cáo [`report/individual/2A202603920_DoHoangVu.md`](report/individual/2A202603920_DoHoangVu.md), và hướng dẫn chạy chi tiết trong [`starter/README.md`](starter/README.md). Branch bài làm: [`develop`](https://github.com/hoangvu1806/K5-L3B-Day06-DoHoangVu-2A202603920-DataIngestionEngineering/tree/develop).
+
+
 Biến tài liệu thành kho tri thức có thể truy xuất cho AI agent, rồi đo xem cách chuẩn bị dữ liệu nào hiệu quả nhất.
 
 | 📄 Dữ liệu | 🧩 Chiến lược | 🎯 Benchmark |
