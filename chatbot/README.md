@@ -24,6 +24,12 @@ Tùy chọn trong `.env`:
 - `CHAT_MODEL=deepseek/deepseek-v4.1-flash` (mặc định; có thể đổi sang model OpenRouter khác hỗ trợ chat completion)
 - `CHAT_REASONING=off` (mặc định). Model mặc định "suy nghĩ ngầm" 280–430 token trước khi viết; đo thực tế tắt reasoning làm token đầu đến nhanh gấp 2–2,5 lần. Đặt `on` để bật lại.
 
+## Tab Benchmark
+Tab thứ hai trên giao diện hiển thị **kết quả benchmark Day 06 đã đóng băng**. Tab chỉ đọc file đã có, không chạy lại retrieval (`GET /api/benchmark`, nguồn dữ liệu ghi trong `chatbot/benchmark.py`):
+- **Thẻ A / B / C:** Hit@1 và Evidence Hit@3 (dev, test), coherence và grounding chấm tay, metadata đúng, tuân thủ filter, số chunk; thẻ C đánh dấu "đã chọn" kèm các bước của tiêu chí chọn (chỉ dựa trên dev).
+- **Bảng 24 câu:** mỗi câu có 3 ô A/B/C (✓ #1, ✓ #2/#3, ✗ chỉ đúng trang, ✗ trượt; câu test có thêm điểm grounding G). Lọc theo dev/test, loại câu, "chỉ câu A/B/C khác nhau", "chỉ câu có cấu hình trượt".
+- **Bấm vào câu:** đáp án mong đợi, evidence, trang gold, filter, ghi chú gold; top-3 chunk của cả 3 cấu hình đặt cạnh nhau, mỗi chunk thu gọn và bấm để mở, **evidence được tô sáng** trong text; grounding và lý do chấm cho câu test.
+
 ## API
 `POST /api/ask/stream` (SSE, giao diện dùng endpoint này) và `POST /api/ask` (JSON một lần) cùng nhận:
 ```json

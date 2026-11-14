@@ -157,9 +157,103 @@ footer { padding: 14px 0 20px; border-top: 1px solid var(--line); }
   #disease { width: 100%; max-width: 250px; }
   .kv { grid-template-columns: 1fr; }
 }
+
+/* ---------------------------------------------------------------- tabs */
+.tabs { display: inline-flex; gap: 2px; background: var(--tint); padding: 3px; border-radius: 10px; }
+.tabs button { border: 0; background: none; padding: 6px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--muted); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(16, 48, 45, .08); }
+.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.head-right { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; }
+body[data-view="bench"] .controls, body[data-view="bench"] footer { display: none; }
+
+/* ---------------------------------------------------------------- benchmark view */
+#bench { overflow-y: auto; padding: 18px 0 32px; }
+.b-intro { color: var(--muted); font-size: 13.5px; margin: 0 0 14px; max-width: 90ch; }
+.b-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; }
+.b-card { border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; background: var(--bg); }
+.b-card.sel { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.b-card h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.b-card .tag { font-size: 11px; font-weight: 600; color: #fff; background: var(--accent); padding: 1px 8px; border-radius: 999px; }
+.b-card .desc { font-size: 12px; color: var(--muted); margin: 2px 0 10px; }
+.b-metrics { display: grid; grid-template-columns: auto 1fr auto; gap: 5px 10px; align-items: center; font-size: 12.5px; }
+.b-metrics .k { color: var(--muted); }
+.b-metrics .v { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.bar { height: 6px; background: var(--tint); border-radius: 999px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.b-sep { grid-column: 1 / -1; border-top: 1px dashed var(--line); margin: 3px 0; }
+.b-select { font-size: 12.5px; color: var(--muted); background: var(--page); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 0 0 18px; }
+.b-select strong { color: var(--accent-ink); }
+
+.b-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; position: sticky; top: -18px; background: var(--bg); padding: 8px 0; z-index: 2; }
+.b-toolbar select { background: var(--bg); border: 1px solid var(--tint-2); border-radius: 10px; padding: 6px 10px; font-size: 13px; }
+.b-toolbar label.chk { font-size: 13px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.b-toolbar .count { margin-left: auto; font-size: 12.5px; color: var(--faint); }
+.b-legend { font-size: 11.5px; color: var(--faint); display: flex; gap: 14px; flex-wrap: wrap; margin: 0 0 8px; }
+
+.b-head, .bq > summary { display: grid; grid-template-columns: 52px 54px minmax(0, 1fr) repeat(3, 92px); gap: 10px; align-items: center; }
+.b-head { font-size: 11.5px; font-weight: 600; color: var(--faint); padding: 0 12px 6px; }
+.b-head .c { text-align: center; }
+.b-list { display: flex; flex-direction: column; gap: 6px; }
+.bq { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.bq > summary { list-style: none; cursor: pointer; padding: 10px 12px; border-radius: 12px; }
+.bq > summary::-webkit-details-marker { display: none; }
+.bq > summary:hover { background: var(--page); }
+.bq[open] { border-color: var(--tint-2); box-shadow: 0 2px 10px rgba(16, 48, 45, .05); }
+.bq[open] > summary { border-bottom: 1px solid var(--line); border-radius: 12px 12px 0 0; }
+.bq .qid { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.split { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 999px; justify-self: start; }
+.split.dev { background: var(--tint); color: var(--muted); }
+.split.test { background: #fff3e0; color: #9a5b00; }
+.bq .qtext { font-size: 14px; min-width: 0; }
+.bq .qtext .type { font-size: 11px; color: var(--faint); margin-left: 6px; }
+.bq .qtext .flt { font-size: 11px; color: var(--accent); background: var(--accent-soft); padding: 0 6px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
+.cell { text-align: center; font-size: 12px; font-weight: 600; border-radius: 8px; padding: 4px 2px; line-height: 1.3; }
+.cell small { display: block; font-weight: 500; font-size: 10.5px; opacity: .85; }
+.cell.r1 { background: #e3f5e8; color: #1e7a3c; }
+.cell.r23 { background: #fff4dc; color: #8a5a00; }
+.cell.pg { background: #fdeceb; color: #b3261e; }
+.cell.miss { background: #fdeceb; color: #b3261e; }
+
+.bq-body { padding: 12px 14px 14px; }
+.gold { display: grid; grid-template-columns: 120px 1fr; gap: 4px 12px; font-size: 13px; margin-bottom: 12px; }
+.gold dt { color: var(--faint); font-size: 12px; }
+.gold dd { margin: 0; }
+.gold .ev { background: #fff7d6; border-radius: 6px; padding: 1px 6px; }
+.gold .note { color: var(--muted); font-size: 12.5px; }
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.col { border: 1px solid var(--line); border-radius: 10px; padding: 8px; background: var(--page); min-width: 0; }
+.col h4 { margin: 0 0 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+.col h4 .res { font-size: 11px; font-weight: 600; }
+.col .gr { font-size: 11.5px; color: var(--muted); margin: 0 0 6px; }
+.col .gr b { color: var(--text); }
+.ch { border: 1px solid var(--line); border-left: 3px solid var(--tint-2); border-radius: 8px; background: var(--bg); margin-top: 5px; }
+.ch.hit { border-left-color: var(--ok); }
+.ch.pageonly { border-left-color: var(--warn); }
+.ch > summary { list-style: none; cursor: pointer; padding: 5px 8px; font-size: 11px; color: var(--muted); }
+.ch > summary::-webkit-details-marker { display: none; }
+.ch > summary .line1 { display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; }
+.ch > summary .rk { font-weight: 700; color: var(--text); }
+.ch > summary .flag { font-weight: 600; }
+.ch.hit .flag { color: var(--ok); }
+.ch.pageonly .flag { color: var(--warn); }
+.ch:not(.hit):not(.pageonly) .flag { color: var(--faint); }
+.ch > summary .pv { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+.ch[open] > summary .pv { display: none; }
+.ch[open] > summary { border-bottom: 1px dashed var(--line); }
+.ch .full { font-size: 12px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; padding: 6px 8px 8px; }
+.ch mark { background: #ffe58a; border-radius: 3px; padding: 0 1px; }
+.b-empty { color: var(--faint); font-size: 13px; padding: 20px 0; }
+
+@media (max-width: 980px) {
+  .b-cards, .cols { grid-template-columns: 1fr; }
+  .b-head { display: none; }
+  .bq > summary { grid-template-columns: 44px 48px minmax(0, 1fr); }
+  .bq > summary .cell { grid-row: 2; }
+  .gold { grid-template-columns: 1fr; }
+}
 </style>
 </head>
-<body>
+<body data-view="chat">
 <div class="app">
   <header>
     <div>
@@ -174,6 +268,11 @@ footer { padding: 14px 0 20px; border-top: 1px solid var(--line); }
         <span class="status warming" id="status">đang khởi động</span>
       </div>
     </div>
+    <div class="head-right">
+    <nav class="tabs" role="tablist" aria-label="Chế độ xem">
+      <button type="button" role="tab" data-view="chat" aria-selected="true">Hỏi đáp</button>
+      <button type="button" role="tab" data-view="bench" aria-selected="false">Benchmark</button>
+    </nav>
     <div class="controls">
       <div class="control">
         <label for="disease">Bệnh (lọc)</label>
@@ -191,6 +290,7 @@ footer { padding: 14px 0 20px; border-top: 1px solid var(--line); }
         </select>
       </div>
     </div>
+    </div>
   </header>
 
   <main id="chat">
@@ -205,6 +305,8 @@ footer { padding: 14px 0 20px; border-top: 1px solid var(--line); }
       </ul>
     </section>
   </main>
+
+  <main id="bench" hidden></main>
 
   <footer>
     <form class="composer" id="form">
@@ -465,6 +567,222 @@ async function ask() {
     input.focus();
   }
 }
+
+// ================================================================ tabs + benchmark view
+const benchEl = document.getElementById('bench');
+let benchData = null;
+
+function setView(view) {
+  document.body.dataset.view = view;
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === view)));
+  chat.hidden = view !== 'chat';
+  benchEl.hidden = view !== 'bench';
+  if (view === 'bench' && !benchData) loadBench();
+  try { localStorage.setItem('rhm-view', view); } catch (e) { /* storage may be blocked */ }
+}
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+
+const TYPE_LABEL = { truc_tiep: 'trực tiếp', dien_dat_lai: 'diễn đạt lại', dieu_kien: 'điều kiện', ngoai_le: 'ngoại lệ', metadata_filter: 'cần filter', phan_mo_dau: 'phần mở đầu' };
+
+function pct(x) { return x === null || x === undefined ? 0 : Math.round(x * 100); }
+function metricRow(grid, label, ratio, text) {
+  grid.appendChild(el('span', 'k', label));
+  const bar = el('span', 'bar'); const fill = el('i'); fill.style.width = pct(ratio) + '%'; bar.appendChild(fill);
+  grid.appendChild(bar);
+  grid.appendChild(el('span', 'v', text));
+}
+
+function renderCards(data) {
+  const wrap = el('div', 'b-cards');
+  Object.entries(data.strategies).forEach(([s, v]) => {
+    const card = el('div', 'b-card' + (v.selected ? ' sel' : ''));
+    const h = el('h3', null, 'Cấu hình ' + s);
+    if (v.selected) h.appendChild(el('span', 'tag', 'đã chọn'));
+    card.appendChild(h);
+    card.appendChild(el('div', 'desc', v.desc + ' · ' + v.chunks + ' chunk'));
+    const g = el('div', 'b-metrics');
+    metricRow(g, 'Hit@1 dev', v.dev.hit1.rate, v.dev.hit1.text);
+    metricRow(g, 'Evidence Hit@3 dev', v.dev.evidence_hit3.rate, v.dev.evidence_hit3.text);
+    metricRow(g, 'Hit@1 test', v.test.hit1.rate, v.test.hit1.text);
+    metricRow(g, 'Evidence Hit@3 test', v.test.evidence_hit3.rate, v.test.evidence_hit3.text);
+    g.appendChild(el('span', 'b-sep'));
+    if (v.coherence) metricRow(g, 'Coherence (tay)', v.coherence.mean / 2, v.coherence.mean + ' / 2');
+    if (v.grounding) metricRow(g, 'Grounding test (tay)', v.grounding.mean / 2, v.grounding.mean + ' / 2');
+    if (v.metadata) {
+      const [n, d] = v.metadata.correct_records.split('/').map(Number);
+      metricRow(g, 'Metadata đúng', d ? n / d : 0, v.metadata.correct_records);
+      const fc = v.metadata.filter_compliance;
+      g.appendChild(el('span', 'k', 'Tuân thủ filter'));
+      g.appendChild(el('span'));
+      g.appendChild(el('span', 'v', fc.startsWith('N/A') ? 'N/A' : fc));
+    }
+    card.appendChild(g);
+    wrap.appendChild(card);
+  });
+  return wrap;
+}
+
+function cellFor(r) {
+  if (!r) return el('span', 'cell', '—');
+  let cls, main, sub;
+  if (r.hit1) { cls = 'r1'; main = '✓ #1'; sub = 'Hit@1'; }
+  else if (r.hit3) { cls = 'r23'; main = '✓ #' + r.first_hit_rank; sub = 'Hit@3'; }
+  else if (r.page_hit3) { cls = 'pg'; main = '✗'; sub = 'chỉ đúng trang'; }
+  else { cls = 'miss'; main = '✗'; sub = 'trượt'; }
+  const c = el('span', 'cell ' + cls, main);
+  c.appendChild(el('small', null, sub + (r.grounding ? ' · G' + r.grounding.label : '')));
+  return c;
+}
+
+// Highlight the gold evidence inside a chunk (whitespace-insensitive), built with text nodes only.
+function highlighted(text, evidence) {
+  const box = el('div', 'full');
+  const words = (evidence || '').trim().split(/\s+/).filter(Boolean)
+    .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const m = words.length ? new RegExp(words.join('\\s+')).exec(text) : null;
+  if (!m) { box.textContent = text; return box; }
+  box.appendChild(document.createTextNode(text.slice(0, m.index)));
+  box.appendChild(el('mark', null, m[0]));
+  box.appendChild(document.createTextNode(text.slice(m.index + m[0].length)));
+  return box;
+}
+
+function chunkEl(h, evidence) {
+  const d = el('details', 'ch' + (h.hit ? ' hit' : (h.page_match ? ' pageonly' : '')));
+  const sm = el('summary');
+  const l1 = el('span', 'line1');
+  l1.appendChild(el('span', 'rk', '#' + h.rank));
+  l1.appendChild(el('span', 'flag', h.hit ? '✓ hit' : (h.page_match ? 'đúng trang, thiếu evidence' : '✗')));
+  const where = h.disease_no ? 'Bệnh ' + h.disease_no : (h.section || h.special_id || '');
+  l1.appendChild(el('span', null, where + ' · tr.' + (h.pages || []).join(',') + (h.section && h.disease_no ? ' · ' + h.section : '') + ' · ' + h.score));
+  sm.appendChild(l1);
+  sm.appendChild(el('span', 'pv', (h.text || '').replace(/\s+/g, ' ').trim()));
+  d.appendChild(sm);
+  d.appendChild(highlighted(h.text || '', evidence));
+  return d;
+}
+
+function questionEl(q) {
+  const d = el('details', 'bq');
+  d.dataset.split = q.split; d.dataset.type = q.type;
+  const sm = el('summary');
+  sm.appendChild(el('span', 'qid', q.id));
+  sm.appendChild(el('span', 'split ' + q.split, q.split));
+  const qt = el('span', 'qtext', q.question);
+  qt.appendChild(el('span', 'type', TYPE_LABEL[q.type] || q.type));
+  if (q.filter) qt.appendChild(el('span', 'flt', 'filter bệnh ' + q.filter.disease_no));
+  sm.appendChild(qt);
+  ['A', 'B', 'C'].forEach(s => sm.appendChild(cellFor(q.results[s])));
+  d.appendChild(sm);
+
+  const body = el('div', 'bq-body');
+  d.addEventListener('toggle', () => {
+    if (!d.open || body.childElementCount) return;   // build details lazily on first open
+    const gold = el('dl', 'gold');
+    const row = (k, v, cls) => { gold.appendChild(el('dt', null, k)); const dd = el('dd', cls); if (v instanceof Node) dd.appendChild(v); else dd.textContent = v; gold.appendChild(dd); };
+    row('Đáp án mong đợi', q.expected_answer);
+    const ev = el('span', 'ev', q.evidence_quote); row('Evidence', ev);
+    row('Trang gold', (q.gold_pages || []).join(', ') + (q.disease_no ? ' · bệnh ' + q.disease_no : ''));
+    if (q.filter) row('Filter (C)', 'disease_no = ' + q.filter.disease_no + (q.filter_rationale ? ' — ' + q.filter_rationale : ''), 'note');
+    if (q.gold_note) row('Ghi chú gold', q.gold_note, 'note');
+    body.appendChild(gold);
+    const cols = el('div', 'cols');
+    ['A', 'B', 'C'].forEach(s => {
+      const r = q.results[s]; const col = el('div', 'col');
+      const h = el('h4', null, 'Cấu hình ' + s);
+      const res = r ? (r.hit1 ? 'Hit@1 ✓' : r.hit3 ? 'Hit@3 ✓ (#' + r.first_hit_rank + ')' : 'trượt') : '—';
+      const rs = el('span', 'res', res); rs.style.color = r && r.hit3 ? (r.hit1 ? 'var(--ok)' : 'var(--warn)') : 'var(--err)';
+      h.appendChild(rs); col.appendChild(h);
+      if (r && r.filter_applied) col.appendChild(el('div', 'gr', 'Lọc disease_no=' + r.filter_applied.disease_no + (r.filter_compliant ? ' · top-3 tuân thủ' : ' · có chunk sai bệnh')));
+      if (r && r.grounding) {
+        const g = el('div', 'gr'); g.appendChild(el('b', null, 'Grounding ' + r.grounding.label + '/2: ')); g.appendChild(document.createTextNode(r.grounding.reason)); col.appendChild(g);
+      }
+      (r ? r.top : []).forEach(hh => col.appendChild(chunkEl(hh, q.evidence_quote)));
+      cols.appendChild(col);
+    });
+    body.appendChild(cols);
+  });
+  d.appendChild(body);
+  return d;
+}
+
+function renderBench(data) {
+  benchEl.innerHTML = '';
+  const intro = el('p', 'b-intro', 'Kết quả benchmark Day 06 đã đóng băng: ' + data.questions.length + ' câu (' + data.run.dev.n + ' dev, ' + data.run.test.n + ' test), top-' + data.run.dev.top_k + ', cùng model embedding cho cả 3 cấu hình. Hit = chunk thuộc trang gold và chứa trọn câu evidence. Coherence/grounding là nhãn chấm tay.');
+  benchEl.appendChild(intro);
+  benchEl.appendChild(renderCards(data));
+  const sel = el('div', 'b-select');
+  sel.appendChild(el('strong', null, 'Chọn cấu hình ' + data.selection.chosen.join(', ') + ' (chỉ dựa trên dev): '));
+  const vi = t => t
+    .replace(/^Rule 1: dev Evidence Hit@3 = /, 'Quy tắc 1 — Evidence Hit@3 dev ')
+    .replace(/; within 1 of best \((\d+)\): /, '; trong khoảng 1 câu so với cao nhất ($1): ')
+    .replace(/^Rule 2: dev Hit@1 among them = /, 'Quy tắc 2 — Hit@1 dev ')
+    .replace(/^Rule 3: chunks = /, 'Quy tắc 3 — số chunk ')
+    .replace(/; best: /, '; cao nhất: ').replace(/; fewest: /, '; ít nhất: ')
+    .replace(/[\[\]']/g, '');
+  sel.appendChild(document.createTextNode(data.selection.steps.map(vi).join(' → ')));
+  benchEl.appendChild(sel);
+
+  const bar = el('div', 'b-toolbar');
+  const split = el('select'); [['all', 'Dev + test'], ['dev', 'Chỉ dev'], ['test', 'Chỉ test']].forEach(([v, t]) => { const o = el('option', null, t); o.value = v; split.appendChild(o); });
+  const type = el('select'); const all = el('option', null, 'Mọi loại câu'); all.value = 'all'; type.appendChild(all);
+  [...new Set(data.questions.map(q => q.type))].forEach(t => { const o = el('option', null, TYPE_LABEL[t] || t); o.value = t; type.appendChild(o); });
+  const diffBox = el('input'); diffBox.type = 'checkbox';
+  const diff = el('label', 'chk'); diff.appendChild(diffBox); diff.appendChild(document.createTextNode('Chỉ câu A/B/C khác nhau'));
+  const missBox = el('input'); missBox.type = 'checkbox';
+  const miss = el('label', 'chk'); miss.appendChild(missBox); miss.appendChild(document.createTextNode('Chỉ câu có cấu hình trượt'));
+  const count = el('span', 'count');
+  [split, type, diff, miss, count].forEach(x => bar.appendChild(x));
+  benchEl.appendChild(bar);
+
+  const legend = el('div', 'b-legend');
+  ['✓ #1 = đúng ở hạng 1', '✓ #2/#3 = đúng trong top-3', '✗ chỉ đúng trang = đúng trang nhưng không chứa trọn evidence', 'G = điểm grounding chấm tay (test, 0–2)', 'Bấm vào câu để xem top-3 chunk của A/B/C'].forEach(t => legend.appendChild(el('span', null, t)));
+  benchEl.appendChild(legend);
+
+  const head = el('div', 'b-head');
+  ['ID', 'Split', 'Câu hỏi', 'A', 'B', 'C'].forEach((t, i) => head.appendChild(el('span', i >= 3 ? 'c' : null, t)));
+  benchEl.appendChild(head);
+  const list = el('div', 'b-list');
+  const items = data.questions.map(q => ({ q, node: questionEl(q) }));
+  items.forEach(it => list.appendChild(it.node));
+  benchEl.appendChild(list);
+  const empty = el('div', 'b-empty', 'Không có câu nào khớp bộ lọc.');
+  benchEl.appendChild(empty);
+
+  const sig = r => r ? (r.hit1 ? 2 : r.hit3 ? 1 : 0) : -1;
+  function apply() {
+    let shown = 0;
+    items.forEach(({ q, node }) => {
+      const rs = ['A', 'B', 'C'].map(s => q.results[s]);
+      const ok = (split.value === 'all' || q.split === split.value)
+        && (type.value === 'all' || q.type === type.value)
+        && (!diffBox.checked || new Set(rs.map(sig)).size > 1)
+        && (!missBox.checked || rs.some(r => r && !r.hit3));
+      node.hidden = !ok; if (ok) shown++;
+    });
+    count.textContent = shown + ' / ' + items.length + ' câu';
+    empty.hidden = shown > 0;
+  }
+  [split, type, diffBox, missBox].forEach(x => x.addEventListener('change', apply));
+  apply();
+}
+
+async function loadBench() {
+  benchEl.innerHTML = '';
+  benchEl.appendChild(el('div', 'thinking', 'đang tải kết quả benchmark'));
+  try {
+    const r = await fetch('/api/benchmark');
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || ('HTTP ' + r.status));
+    benchData = data;
+    renderBench(data);
+  } catch (e) {
+    benchEl.innerHTML = '';
+    benchEl.appendChild(el('p', 'error-msg', 'Không tải được benchmark: ' + e.message));
+  }
+}
+
+try { if (localStorage.getItem('rhm-view') === 'bench') setView('bench'); } catch (e) { /* ignore */ }
 </script>
 </body>
 </html>
